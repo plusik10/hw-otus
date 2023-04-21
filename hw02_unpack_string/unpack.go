@@ -38,6 +38,7 @@ func Unpack(str string) (string, error) {
 	}
 	return sb.String(), nil
 }
+
 func IsDigit(r rune) bool {
 	if r > 47 && r < 58 {
 		return true
