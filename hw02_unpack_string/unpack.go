@@ -15,10 +15,8 @@ func Unpack(str string) (string, error) {
 	if IsDigit(rune(str[0])) {
 		return "", ErrInvalidString
 	}
-
 	sb := strings.Builder{}
 	r := []rune(str)
-
 	for i := 1; i <= len(r)-1; i++ {
 		cur := r[i]
 		prev := r[i-1]
@@ -35,13 +33,11 @@ func Unpack(str string) (string, error) {
 			sb.WriteRune(prev)
 		}
 	}
-
 	if !IsDigit(r[len(r)-1]) {
 		sb.WriteRune(r[len(r)-1])
 	}
 	return sb.String(), nil
 }
-
 func IsDigit(r rune) bool {
 	if r > 47 && r < 58 {
 		return true

@@ -35,6 +35,30 @@ func TestUnpack(t *testing.T) {
 	}
 }
 
+func TestUnpackWithOtherLang(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{name: "Japanese", input: "煙と4風", expected: "煙とととと風"},
+		{name: "Japanese", input: "桜の花0", expected: "桜の"},
+		{name: "Russian", input: "Х2ЛО", expected: "ХХЛО"},
+		{name: "Russian", input: "г0р2с2тка0", expected: "ррсстк"},
+		{name: "Arabian", input: "مرحبًا", expected: "مرحبًا"},
+		{name: "Arabian", input: "الله يبار2ك", expected: "الله يباررك"},
+	}
+
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.input, func(t *testing.T) {
+			result, err := Unpack(tc.input)
+			require.NoError(t, err)
+			require.Equal(t, tc.expected, result, tc.name)
+		})
+	}
+}
+
 func TestUnpackInvalidString(t *testing.T) {
 	invalidStrings := []string{"3abc", "45", "aaa10b"}
 	for _, tc := range invalidStrings {
