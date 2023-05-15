@@ -9,7 +9,7 @@ import (
 // Change to true if needed.
 var taskWithAsteriskIsCompleted = false
 
-var text = `Как видите, он  спускается  по  лестнице  вслед  за  своим
+var testTextKristofer = `Как видите, он  спускается  по  лестнице  вслед  за  своим
 	другом   Кристофером   Робином,   головой   вниз,  пересчитывая
 	ступеньки собственным затылком:  бум-бум-бум.  Другого  способа
 	сходить  с  лестницы  он  пока  не  знает.  Иногда ему, правда,
@@ -48,6 +48,19 @@ func TestTop10(t *testing.T) {
 		require.Len(t, Top10(""), 0)
 	})
 
+	t.Run("single word", func(t *testing.T) {
+		expected := []string{"word"}
+		require.Equal(t, expected, Top10("word"))
+	})
+
+	t.Run("duplicate words", func(t *testing.T) {
+		expected := []string{"word1", "word2", "word3"}
+		require.Equal(t, expected, Top10("word1 word2 word1 word3 word2 word1"))
+	})
+	t.Run("less than 10 words", func(t *testing.T) {
+		expected := []string{"word1", "word2", "word3"}
+		require.Equal(t, expected, Top10("word1 word2 word3"))
+	})
 	t.Run("positive test", func(t *testing.T) {
 		if taskWithAsteriskIsCompleted {
 			expected := []string{
@@ -62,7 +75,7 @@ func TestTop10(t *testing.T) {
 				"кристофер", // 4
 				"не",        // 4
 			}
-			require.Equal(t, expected, Top10(text))
+			require.Equal(t, expected, Top10(testTextKristofer))
 		} else {
 			expected := []string{
 				"он",        // 8
@@ -76,7 +89,7 @@ func TestTop10(t *testing.T) {
 				"не",        // 4
 				"то",        // 4
 			}
-			require.Equal(t, expected, Top10(text))
+			require.Equal(t, expected, Top10(testTextKristofer))
 		}
 	})
 }
