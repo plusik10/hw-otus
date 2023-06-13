@@ -70,7 +70,6 @@ func (l *list) PushBack(v interface{}) *ListItem {
 }
 
 func (l *list) Remove(i *ListItem) {
-
 	switch {
 	case l.length == 0:
 		return
@@ -97,8 +96,15 @@ func (l *list) Remove(i *ListItem) {
 }
 
 func (l *list) MoveToFront(i *ListItem) {
-	l.PushFront(i)
-	l.Remove(i)
+	if l.length == 0 || i == l.head {
+		return
+	}
+	if l.head != nil {
+		l.Remove(i)
+		l.length++
+		i.Prev, i.Next, l.head.Prev = nil, l.head, i
+		l.head = i
+	}
 }
 
 func NewList() List {
