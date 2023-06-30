@@ -16,6 +16,8 @@ func TestUnpack(t *testing.T) {
 		{input: "abccd", expected: "abccd"},
 		{input: "", expected: ""},
 		{input: "aaa0b", expected: "aab"},
+		{input: "d\n5abc", expected: "d\n\n\n\n\nabc"},
+		{input: "a0", expected: ""},
 		// uncomment if task with asterisk completed
 		// {input: `qwe\4\5`, expected: `qwe45`},
 		// {input: `qwe\45`, expected: `qwe44444`},
@@ -29,6 +31,30 @@ func TestUnpack(t *testing.T) {
 			result, err := Unpack(tc.input)
 			require.NoError(t, err)
 			require.Equal(t, tc.expected, result)
+		})
+	}
+}
+
+func TestUnpackWithOtherLang(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{name: "Japanese", input: "煙と4風", expected: "煙とととと風"},
+		{name: "Japanese", input: "桜の花0", expected: "桜の"},
+		{name: "Russian", input: "Х2ЛО", expected: "ХХЛО"},
+		{name: "Russian", input: "г0р2с2тка0", expected: "ррсстк"},
+		{name: "Arabian", input: "مرحبًا", expected: "مرحبًا"},
+		{name: "Arabian", input: "الله يبار2ك", expected: "الله يباررك"},
+	}
+
+	for _, tc := range tests {
+		tc := tc
+		t.Run(tc.input, func(t *testing.T) {
+			result, err := Unpack(tc.input)
+			require.NoError(t, err)
+			require.Equal(t, tc.expected, result, tc.name)
 		})
 	}
 }
