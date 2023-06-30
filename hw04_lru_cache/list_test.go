@@ -6,6 +6,88 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestList_MoveToFront(t *testing.T) {
+	t.Run("move element to front", func(t *testing.T) {
+		l := NewList()
+
+		l.PushFront(1)
+		item2 := l.PushBack(2)
+		l.PushBack(3)
+		l.MoveToFront(item2)
+
+		require.Equal(t, 3, l.Len())
+		require.Equal(t, 2, l.Front().Value)
+		require.Equal(t, 3, l.Back().Value)
+	})
+
+	t.Run("move head element", func(t *testing.T) {
+		l := NewList()
+
+		l.PushFront(1)
+		l.PushFront(2)
+		l.PushFront(3)
+		item := l.Front()
+		l.MoveToFront(item)
+
+		require.Equal(t, 3, l.Len())
+		require.Equal(t, 3, l.Front().Value)
+		require.Equal(t, 1, l.Back().Value)
+	})
+
+	t.Run("move tail element", func(t *testing.T) {
+		l := NewList()
+
+		l.PushFront(1)
+		l.PushFront(2)
+		l.PushFront(3)
+		item := l.Back()
+		l.MoveToFront(item)
+
+		require.Equal(t, 3, l.Len())         // 3
+		require.Equal(t, 1, l.Front().Value) // 1
+		require.Equal(t, 2, l.Back().Value)  // 2
+	})
+}
+
+func TestRemoveElement(t *testing.T) {
+	t.Run("Remove single element", func(t *testing.T) {
+		l := NewList()
+		item := l.PushFront(1)
+		l.Remove(item)
+
+		require.Equal(t, 0, l.Len())
+		require.Nil(t, l.Front())
+		require.Nil(t, l.Back())
+	})
+	t.Run("remove tail element", func(t *testing.T) {
+		l := NewList()
+
+		l.PushFront(1)
+		l.PushFront(2)
+		l.PushFront(3)
+		item := l.Back()
+		l.Remove(item)
+
+		require.Equal(t, 2, l.Len())
+		require.Equal(t, 3, l.Front().Value)
+		require.Equal(t, 2, l.Back().Value)
+	})
+
+	t.Run("remove head element", func(t *testing.T) {
+		l := NewList()
+
+		l.PushFront(1)
+		l.PushFront(2)
+		l.PushFront(3)
+		item := l.Front()
+		l.Remove(item)
+
+		require.Equal(t, 2, l.Len())
+		require.Equal(t, 2, l.Front().Value)
+		require.Equal(t, 1, l.Back().Value)
+	})
+}
+
 func TestList(t *testing.T) {
 	t.Run("empty list", func(t *testing.T) {
 		l := NewList()
