@@ -90,4 +90,57 @@ func TestPipeline(t *testing.T) {
 		require.Len(t, result, 0)
 		require.Less(t, int64(elapsed), int64(abortDur)+int64(fault))
 	})
+
+	t.Run("negative numbers", func(t *testing.T) {
+		g := func(_ string, f func(v interface{}) interface{}) Stage {
+			return func(in In) Out {
+				out := make(Bi)
+				go func() {
+					defer close(out)
+					for v := range in {
+						time.Sleep(sleepPerStage)
+						out <- f(v)
+					}
+				}()
+				return out
+			}
+		}
+
+		stages := []Stage{
+			g("Abs", func(v interface{}) interface{} {
+				num := v.(int)
+				if num < 0 {
+					return -num
+				}
+				return num
+			}),
+			g("Multiplier (* 5)", func(v interface{}) interface{} {
+				return v.(int) * 5
+			}),
+			g("Subtractor (- 30)", func(v interface{}) interface{} {
+				return v.(int) - 30
+			}),
+			g("Stringifier", func(v interface{}) interface{} {
+				return strconv.Itoa(v.(int))
+			}),
+		}
+
+		in := make(Bi)
+		data := []int{-10, -5, 0, 5, 10}
+
+		go func() {
+			for _, v := range data {
+				in <- v
+			}
+			close(in)
+		}()
+
+		result := make([]string, 0, 10)
+
+		for s := range ExecutePipeline(in, nil, stages...) {
+			result = append(result, s.(string))
+		}
+
+		require.Equal(t, []string{"20", "-5", "-30", "-5", "20"}, result)
+	})
 }
