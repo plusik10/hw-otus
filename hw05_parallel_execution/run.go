@@ -10,30 +10,45 @@ var ErrErrorsLimitExceeded = errors.New("errors limit exceeded")
 
 type Task func() error
 
-func Run(tasks []Task, n, m int) error {
-	wg := sync.WaitGroup{}
-	wg.Add(len(tasks))
-	workersPool := make(chan struct{}, n)
-	maxErrors := int64(m)
-	var errCount int64
-
-	for i, task := range tasks {
-		if atomic.LoadInt64(&errCount) >= maxErrors && maxErrors > 0 {
-			wg.Add(-(len(tasks) - i))
-			return ErrErrorsLimitExceeded
+func Worker(wg *sync.WaitGroup, taskChan <-chan Task, m int64, Count *int64) {
+	defer wg.Done()
+	for task := range taskChan {
+		if m > 0 && atomic.LoadInt64(Count) >= m {
+			break
 		}
-		workersPool <- struct{}{}
-		go func(task Task) {
-			defer func() {
-				<-workersPool
-				wg.Done()
-			}()
-			taskError := task()
-			if taskError != nil {
-				atomic.AddInt64(&errCount, 1)
-			}
-		}(task)
+		err := task()
+		if err != nil {
+			atomic.AddInt64(Count, 1)
+		}
+
 	}
+}
+
+func Run(tasks []Task, n, m int) error {
+	var errorsCount int64
+
+	taskChan := make(chan Task)
+
+	go func() {
+		defer close(taskChan)
+		for _, t := range tasks {
+			if m > 0 && atomic.LoadInt64(&errorsCount) >= int64(m) {
+				break
+			}
+			taskChan <- t
+		}
+	}()
+
+	wg := sync.WaitGroup{}
+	wg.Add(n)
+	for i := 0; i < n; i++ {
+		go Worker(&wg, taskChan, int64(m), &errorsCount)
+	}
+
 	wg.Wait()
+
+	if m > 0 && atomic.LoadInt64(&errorsCount) >= int64(m) {
+		return ErrErrorsLimitExceeded
+	}
 	return nil
 }
