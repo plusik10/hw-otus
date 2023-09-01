@@ -10,17 +10,16 @@ var ErrErrorsLimitExceeded = errors.New("errors limit exceeded")
 
 type Task func() error
 
-func Worker(wg *sync.WaitGroup, taskChan <-chan Task, m int64, Count *int64) {
+func Worker(wg *sync.WaitGroup, taskChan <-chan Task, m int64, count *int64) {
 	defer wg.Done()
 	for task := range taskChan {
-		if m > 0 && atomic.LoadInt64(Count) >= m {
+		if m > 0 && atomic.LoadInt64(count) >= m {
 			break
 		}
 		err := task()
 		if err != nil {
-			atomic.AddInt64(Count, 1)
+			atomic.AddInt64(count, 1)
 		}
-
 	}
 }
 
